@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster" // Import Toaster
 const inter = Inter({ subsets: ['latin'] }); // Initialize Inter font
 
 export const metadata: Metadata = {
-  title: 'LeafWise - Maize Disease Detection', // Updated title
+  title: 'ZeaWatch - Maize Disease Detection', // Updated title
   description: 'Detect maize leaf diseases using AI.', // Updated description
 };
 

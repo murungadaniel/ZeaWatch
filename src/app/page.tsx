@@ -246,170 +246,182 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-grow container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Upload/Capture and Analysis */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
-           <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-primary">
-                <Leaf size={24} />
-                Analyze Maize Leaf
-              </CardTitle>
-              <CardDescription>Upload an image or use your camera to detect potential diseases.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-6">
-               <Tabs value={captureMode} onValueChange={(value) => handleModeChange(value as CaptureMode)} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4">
-                        <TabsTrigger value="upload"><Upload className="mr-2 h-4 w-4"/> Upload Image</TabsTrigger>
-                        <TabsTrigger value="camera"><Camera className="mr-2 h-4 w-4"/> Use Camera</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="upload">
-                         <div className="flex flex-col md:flex-row items-center gap-6">
-                            <ImageUpload
-                                previewUrl={previewUrl}
-                                onImageChange={handleImageChange}
-                                isLoading={isLoading}
-                                captureMode="upload" // Pass mode
-                            />
-                             {previewUrl && selectedImageFile && (
-                                <Button variant="outline" onClick={() => { setPreviewUrl(null); setSelectedImageFile(null); setPrediction(null); setError(null); }} className="mt-2 md:mt-0">
-                                    <XCircle className="mr-2 h-4 w-4" /> Clear Selection
-                                </Button>
-                            )}
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="camera">
-                        <div className="flex flex-col items-center gap-4">
-                           {/* Always render video/canvas elements to avoid hydration issues */}
-                           <div className="relative w-full max-w-md aspect-video border rounded-md overflow-hidden bg-muted">
-                               <video ref={videoRef} className={cn("w-full h-full object-cover", isCameraActive ? "block" : "hidden")} autoPlay muted playsInline />
-                                <canvas ref={canvasRef} className="hidden" /> {/* Hidden canvas for capture */}
+      <main className="flex-grow container mx-auto p-4 md:p-8">
+         {/* Introduction Section */}
+         <section className="mb-8 p-6 bg-card rounded-lg shadow-sm border">
+            <h2 className="text-2xl font-semibold text-primary mb-3">Welcome to ZeaWatch!</h2>
+            <p className="text-muted-foreground">
+               Protect your maize crops with the power of AI. Upload a photo of a maize leaf or use your camera,
+               and ZeaWatch will analyze it to detect potential diseases. Get instant insights, descriptions,
+               and actionable recommendations to keep your harvest healthy.
+            </p>
+         </section>
 
-                                { !isCameraActive && !previewUrl && (
-                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-                                        <Camera size={48} className="mb-2" />
-                                        <p>Camera is off</p>
-                                    </div>
-                                )}
+         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Upload/Capture and Analysis */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+             <Card className="shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-primary">
+                  <Leaf size={24} />
+                  Analyze Maize Leaf
+                </CardTitle>
+                <CardDescription>Upload an image or use your camera to detect potential diseases.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-6">
+                 <Tabs value={captureMode} onValueChange={(value) => handleModeChange(value as CaptureMode)} className="w-full">
+                      <TabsList className="grid w-full grid-cols-2 mb-4">
+                          <TabsTrigger value="upload"><Upload className="mr-2 h-4 w-4"/> Upload Image</TabsTrigger>
+                          <TabsTrigger value="camera"><Camera className="mr-2 h-4 w-4"/> Use Camera</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="upload">
+                           <div className="flex flex-col md:flex-row items-center gap-6">
+                              <ImageUpload
+                                  previewUrl={previewUrl}
+                                  onImageChange={handleImageChange}
+                                  isLoading={isLoading}
+                                  captureMode="upload" // Pass mode
+                              />
+                               {previewUrl && selectedImageFile && (
+                                  <Button variant="outline" onClick={() => { setPreviewUrl(null); setSelectedImageFile(null); setPrediction(null); setError(null); }} className="mt-2 md:mt-0">
+                                      <XCircle className="mr-2 h-4 w-4" /> Clear Selection
+                                  </Button>
+                              )}
+                          </div>
+                      </TabsContent>
+                      <TabsContent value="camera">
+                          <div className="flex flex-col items-center gap-4">
+                             {/* Always render video/canvas elements to avoid hydration issues */}
+                             <div className="relative w-full max-w-md aspect-video border rounded-md overflow-hidden bg-muted">
+                                 <video ref={videoRef} className={cn("w-full h-full object-cover", isCameraActive ? "block" : "hidden")} autoPlay muted playsInline />
+                                  <canvas ref={canvasRef} className="hidden" /> {/* Hidden canvas for capture */}
 
-                                { previewUrl && (
-                                    <Image
-                                        src={previewUrl}
-                                        alt="Captured Leaf"
-                                        layout="fill"
-                                        objectFit="cover"
-                                        className={cn("transition-opacity duration-300", isLoading ? 'opacity-50' : 'opacity-100')}
-                                        data-ai-hint="maize leaf"
-                                    />
-                                )}
-                           </div>
+                                  { !isCameraActive && !previewUrl && (
+                                       <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+                                          <Camera size={48} className="mb-2" />
+                                          <p>Camera is off</p>
+                                      </div>
+                                  )}
 
-
-                            {/* Camera Controls */}
-                            <div className="flex gap-2">
-                                {!isCameraActive && !previewUrl && (
-                                    <Button onClick={startCameraStream} disabled={isLoading || hasCameraPermission === false}>
-                                        <Power className="mr-2 h-4 w-4" /> Turn On Camera
-                                    </Button>
-                                )}
-                                {isCameraActive && (
-                                    <>
-                                        <Button onClick={handleCapturePhoto} disabled={isLoading}>
-                                            <Camera className="mr-2 h-4 w-4" /> Capture Photo
-                                        </Button>
-                                        <Button variant="outline" onClick={stopCameraStream} disabled={isLoading}>
-                                            <Power className="mr-2 h-4 w-4" /> Turn Off Camera
-                                        </Button>
-                                    </>
-                                )}
-                                {previewUrl && !isCameraActive && (
-                                     <Button variant="outline" onClick={handleRetake} disabled={isLoading}>
-                                        <Camera className="mr-2 h-4 w-4" /> Retake Photo
-                                    </Button>
-                                )}
-                            </div>
+                                  { previewUrl && (
+                                      <Image
+                                          src={previewUrl}
+                                          alt="Captured Leaf"
+                                          layout="fill"
+                                          objectFit="cover"
+                                          className={cn("transition-opacity duration-300", isLoading ? 'opacity-50' : 'opacity-100')}
+                                          data-ai-hint="maize leaf"
+                                      />
+                                  )}
+                             </div>
 
 
-                            {/* Permission Status Alerts */}
-                           {hasCameraPermission === false && (
-                               <Alert variant="destructive" className="w-full max-w-md">
-                                    <AlertTriangle className="h-4 w-4" />
-                                    <AlertTitle>Camera Access Denied</AlertTitle>
-                                    <AlertDescription>
-                                    {error || 'Please allow camera access in your browser settings and refresh the page.'}
-                                    </AlertDescription>
-                                </Alert>
-                            )}
-                             {hasCameraPermission === null && !isCameraActive && !error && (
-                                <Alert className="w-full max-w-md">
-                                    <AlertTriangle className="h-4 w-4" />
-                                    <AlertTitle>Camera Permission</AlertTitle>
-                                    <AlertDescription>
-                                    Click "Turn On Camera". You may need to grant permission in your browser.
-                                    </AlertDescription>
-                                </Alert>
-                            )}
+                              {/* Camera Controls */}
+                              <div className="flex gap-2">
+                                  {!isCameraActive && !previewUrl && (
+                                      <Button onClick={startCameraStream} disabled={isLoading || hasCameraPermission === false}>
+                                          <Power className="mr-2 h-4 w-4" /> Turn On Camera
+                                      </Button>
+                                  )}
+                                  {isCameraActive && (
+                                      <>
+                                          <Button onClick={handleCapturePhoto} disabled={isLoading}>
+                                              <Camera className="mr-2 h-4 w-4" /> Capture Photo
+                                          </Button>
+                                          <Button variant="outline" onClick={stopCameraStream} disabled={isLoading}>
+                                              <Power className="mr-2 h-4 w-4" /> Turn Off Camera
+                                          </Button>
+                                      </>
+                                  )}
+                                  {previewUrl && !isCameraActive && (
+                                       <Button variant="outline" onClick={handleRetake} disabled={isLoading}>
+                                          <Camera className="mr-2 h-4 w-4" /> Retake Photo
+                                      </Button>
+                                  )}
+                              </div>
 
-                        </div>
-                    </TabsContent>
-                </Tabs>
 
-              {/* Analysis Button and Progress */}
-              <div className="flex-grow flex flex-col justify-center items-start gap-4 mt-4">
-                <Button
-                  onClick={handleAnalyzeClick}
-                  // Disable if loading, or if no image selected/captured
-                  disabled={isLoading || (!selectedImageFile && !previewUrl)}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" /> Analyze Leaf
-                    </>
+                              {/* Permission Status Alerts */}
+                             {hasCameraPermission === false && (
+                                 <Alert variant="destructive" className="w-full max-w-md">
+                                      <AlertTriangle className="h-4 w-4" />
+                                      <AlertTitle>Camera Access Denied</AlertTitle>
+                                      <AlertDescription>
+                                      {error || 'Please allow camera access in your browser settings and refresh the page.'}
+                                      </AlertDescription>
+                                  </Alert>
+                              )}
+                               {hasCameraPermission === null && !isCameraActive && !error && (
+                                  <Alert className="w-full max-w-md">
+                                      <AlertTriangle className="h-4 w-4" />
+                                      <AlertTitle>Camera Permission</AlertTitle>
+                                      <AlertDescription>
+                                      Click "Turn On Camera". You may need to grant permission in your browser.
+                                      </AlertDescription>
+                                  </Alert>
+                              )}
+
+                          </div>
+                      </TabsContent>
+                  </Tabs>
+
+                {/* Analysis Button and Progress */}
+                <div className="flex-grow flex flex-col justify-center items-start gap-4 mt-4">
+                  <Button
+                    onClick={handleAnalyzeClick}
+                    // Disable if loading, or if no image selected/captured
+                    disabled={isLoading || (!selectedImageFile && !previewUrl)}
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" /> Analyze Leaf
+                      </>
+                    )}
+                  </Button>
+                  {isLoading && <Progress value={50} className="w-full h-2 animate-pulse" />} {/* Use indeterminate progress */}
+                   {error && !isLoading && ( // Show general errors only when not loading camera errors
+                    <Alert variant="destructive" className="w-full">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>Error</AlertTitle>
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
                   )}
-                </Button>
-                {isLoading && <Progress value={50} className="w-full h-2 animate-pulse" />} {/* Use indeterminate progress */}
-                 {error && !isLoading && ( // Show general errors only when not loading camera errors
-                  <Alert variant="destructive" className="w-full">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </CardContent>
+                </div>
+              </CardContent>
+            </Card>
+
+            {prediction && !isLoading && <PredictionResult prediction={prediction} />}
+          </div>
+
+          {/* Right Column: Scan History */}
+          <Card className="shadow-md h-fit sticky top-8">
+              <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-primary">
+                  <History size={24} />
+                  Scan History
+              </CardTitle>
+              <CardDescription>Review your previous scans.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  {isClient ? ( // Only render ScanHistory client-side
+                      <ScanHistory history={scanHistory} onClearHistory={handleClearHistory} />
+                  ) : (
+                     <div className="flex justify-center items-center h-32">
+                         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                     </div>
+                  )}
+              </CardContent>
           </Card>
-
-          {prediction && !isLoading && <PredictionResult prediction={prediction} />}
-        </div>
-
-        {/* Right Column: Scan History */}
-        <Card className="shadow-md h-fit sticky top-8">
-            <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-primary">
-                <History size={24} />
-                Scan History
-            </CardTitle>
-            <CardDescription>Review your previous scans.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {isClient ? ( // Only render ScanHistory client-side
-                    <ScanHistory history={scanHistory} onClearHistory={handleClearHistory} />
-                ) : (
-                   <div className="flex justify-center items-center h-32">
-                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                   </div>
-                )}
-            </CardContent>
-        </Card>
+         </div>
       </main>
 
       <footer className="text-center p-4 text-muted-foreground text-sm border-t">
-        LeafWise &copy; {new Date().getFullYear()}
+        ZeaWatch &copy; {new Date().getFullYear()}
       </footer>
     </div>
   );

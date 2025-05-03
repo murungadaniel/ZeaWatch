@@ -7,7 +7,7 @@ const Header = () => {
       <div className="container mx-auto flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
           <Leaf size={32} />
-          <h1 className="text-2xl font-bold">LeafWise</h1>
+          <h1 className="text-2xl font-bold">ZeaWatch</h1>
         </div>
         {/* Add navigation or other header elements here if needed */}
       </div>
