@@ -1,0 +1,7 @@
+Flask>=2.0
+python-dotenv>=0.19
+Flask-CORS>=3.0
+genkit>=1.0.0
+firebase-genkit-googleai>=1.0.0 # Or appropriate googleai plugin for python genkit
+Pydantic>=2.0 # For schema definition
+gunicorn>=20.0 # Optional: for production
